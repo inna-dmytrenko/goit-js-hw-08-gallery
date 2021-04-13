@@ -1,5 +1,4 @@
-// export default
-  const imges = [
+export default [
   {
     preview:
       'https://cdn.pixabay.com/photo/2019/05/14/16/43/himilayan-blue-poppy-4202825__340.jpg',
@@ -64,35 +63,3 @@
     description: 'Lighthouse Coast Sea',
   },
 ];
-
-// const itemEl = ({})
-const galleryContainer = document.querySelector('.js-gallery');
-const imgMarkup = createImg(imges);
-galleryContainer.insertAdjacentHTML("beforeend", imgMarkup);
-
-galleryContainer.addEventListener('click', onGalleryContainerClick);
-
-function createImg(imges) {
-  return imges.map(({preview, original, description}) => {
-    return `
-    <li class="gallery__item">
-    <a
-      class="gallery__link"
-      href="${original}"
-    >
-      <img
-        class="gallery__image"
-        src="${preview}"
-        data-source="${original}"
-        alt="${description}"
-      />
-    </a>
-  </li>
-    `
-  }).join('');
-  
-}
-
-function onGalleryContainerClick(e) {
-console.log(e.target)
-}
