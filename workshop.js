@@ -69,6 +69,8 @@ function keyboardManipulation({ key }) {
       refs.modalImg.src = "";
       refs.modalImg.alt = "";
       break;
+    default:
+      console.log('Error')
   }
 }
 
