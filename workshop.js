@@ -1,98 +1,75 @@
-import images from "./gallery-items.js";
-// console.log(images);
-const galleryContainer = document.querySelector('.js-gallery');
-
-const lightboxEl = document.querySelector('.lightbox');
-const btnEl = document.querySelector('[data-action="close-lightbox"]');
-const overlay = document.querySelector('div.lightbox__overlay');
-
-
-const imgMarkup = createImg(images);
-galleryContainer.insertAdjacentHTML("beforeend", imgMarkup);
-
-galleryContainer.addEventListener('click', onGalleryContainerClick);
-btnEl.addEventListener('click', onBtnElClose);
-overlay.addEventListener('click', onClickOverlay);
-document.body.addEventListener('keydown', onKeyUp);
-
-// const lightboxImg = document.querySelector('img.is-open');
-let currentIndex = 1;
-
-document.addEventListener('keydown', (e) => {
-  if (e.code !== 'ArrowLeft' && e.code !== 'ArrowRight') {
-    return;
-  }
-  else if (e.code == 'ArrowLeft') {
-    currentIndex -= 1
-  } else if (e.code == 'ArrowRight') {
-    currentIndex += 1
-  }
-  console.log(e.code);
-  console.log(currentIndex);
-  console.log(setModalImage(currentIndex))
-})
-function setModalImage(index) {
-console.log(images[index])
+import gallery from "./gallery-items.js";
+const refs = {
+  gallery: document.querySelector('.js-gallery'),
+  modal: document.querySelector('.lightbox'),
+  modalImg: document.querySelector('.lightbox__image'),
 }
 
+refs.gallery.addEventListener('click', onGalleryClick);
+refs.modal.addEventListener('click', onCloseModal)
 
 
+let activeIndex = null;
 
-function createImg(imges) {
-  return imges.map(({preview, original, description}) => {
-    return `
-    <li class="gallery__item">
-    <a
-      class="gallery__link"
-      href="${original}"
-    >
-      <img
-        class="gallery__image"
+const createGallery = gallery.map(({preview, original, description}) => {
+    return `<li class="gallery__item"><a class="gallery__link" href="${original}">
+      <img class="gallery__image"
         src="${preview}"
         data-source="${original}"
-        alt="${description}"
-      />
-    </a>
-  </li>
-    `
-  }).join('');
-
+        alt="${description}"/></a></li>`
+});
   
-}
+refs.gallery.insertAdjacentHTML("beforeend", createGallery.join(''));
 
-function onGalleryContainerClick(e) {
+function onGalleryClick(e) {
   e.preventDefault();
-  if (e.target.nodeName === "IMG") {
-    lightboxEl.classList.add('is-open');
-    lightboxEl.querySelector('.lightbox__image').src = e.target.dataset.source;
-    lightboxEl.querySelector('.lightbox__image').alt = e.target.alt;
+  if (e.target.nodeName !== "IMG") {
+    return;
   }
-  // console.log(e.target.nodeName)
+  createGallery.forEach((el, ind) => {
+    if (el.includes(e.target.src)) {
+      activeIndex = ind;
+      return;
+    }
+  });
+    refs.modal.classList.add('is-open');
+    refs.modalImg.src = e.target.dataset.source;
+    refs.modalImg.alt = e.target.alt;
 }
 
-function onBtnElClose(e) {
-  if (e.target.nodeName === "BUTTON") {
-    lightboxEl.classList.remove('is-open');
+function onCloseModal(e) {
+  if (e.target.nodeName !== "IMG") {
+    refs.modal.classList.remove('is-open');
+    refs.modalImg.src = "";
+    refs.modalImg.alt = "";
   }
   
 }
 
-function onClickOverlay(e) {
-
-  if(e.target.nodeName === 'DIV')
-  {
-    lightboxEl.classList.remove('is-open');
+function keyboardManipulation({ key }) {
+  switch (key) {
+    case gallery.length - 1 > activeIndex && 'ArrowRight':
+      activeIndex += 1;
+      refs.modalImg.src = gallery[activeIndex].original;
+      break;
+    case activeIndex > 0 && 'ArrowLeft':
+      activeIndex -= 1;
+      refs.modalImg.src = gallery[activeIndex].original;
+      break;
+    case activeIndex === gallery.length - 1 && 'ArrowRight':
+      activeIndex = 0;
+      refs.modalImg.src = gallery[activeIndex].original;
+      break;
+    case activeIndex === 0 && 'ArrowLeft':
+      activeIndex = gallery.length - 1;
+      refs.modalImg.src = gallery[activeIndex].original;
+      break;
+    case 'Escape':
+      refs.modal.classList.remove('is-open');
+      refs.modalImg.src = "";
+      refs.modalImg.alt = "";
+      break;
   }
-
 }
 
-function onKeyUp(e) {
-  // console.log(e.keyCode)
-
-  if (e.keyCode == 27) {
-    lightboxEl.classList.remove('is-open');
-  }
-  
-};
-
-
+window.addEventListener('keydown', keyboardManipulation);
